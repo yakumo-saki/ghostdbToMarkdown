@@ -1,0 +1,14 @@
+## ghostdbToMarkdown
+
+Convert self-hosted ghost blog to markdown based blogging tool. (like Hugo, jekyll)
+
+## Requirements
+
+* Can connect mysql database directly.
+
+## Limitation
+
+* tag not converted
+* Link tag is not converted. remain as HTML
+* List tag ("*" or "-" in markdown) is always converted to "-"
+* img tag are remain as HTML. but __GHOST_URL__/content is deleted.
