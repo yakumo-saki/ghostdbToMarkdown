@@ -16,12 +16,14 @@ tz = None          # ex) "+0900"
 
 exportType = 'hugo'  # available types 'hugo' 'jekyll'
 
-dirspec="%Y%M"     # output directory structure "" means all files in one directory
+dirspec="%Y%m"     # output directory structure "" means all files in one directory
 
 def isHugo():
+  global exportType
   return (exportType == 'hugo')
 
 def isJekyll():
+  global exportType
   return (exportType == 'jekyll')
 
 # <h2 id="">前提</h2>
@@ -117,15 +119,33 @@ def processBody(htmlBody):
 
   return result
 
+# Title項目に使えない文字列を置換
+def processTitle(title):
+  result = title.replace("\"", "\\\"")
+  return result
+
 # 
-# note jekyll needs filename yyyy-mm-dd-TITLE.md 
 def createMarkdown(outputPath, title, htmlbodyString, publishDate, slug):
+  import os
+
   global tz
 
-  dateStr = publishDate.strftime("%Y-%m-%d")
+  subdirName = publishDate.strftime(dirspec)
 
-  filepath = path.join(outputPath, f"{dateStr}-{slug}.{extension}")
+  if isJekyll():
+    # jekyll needs filename as yyyy-mm-dd-TITLE.md 
+    dateStr = publishDate.strftime('%Y-%m-%d')
+  else:
+    dateStr = publishDate.strftime('%Y%m%d')
+
+  filepath = ""
+  if isJekyll():
+    filepath = path.join(outputPath, subdirName, f"{dateStr}-{slug}.{extension}")
+  else:
+    filepath = path.join(outputPath, subdirName, f"{dateStr}_{slug}.{extension}")
+
   print(filepath)
+  os.makedirs(path.join(outputPath, subdirName), exist_ok=True)
 
   with open(filepath, 'w', encoding='UTF-8') as f:
     blogDate = publishDate.strftime(f"%Y-%m-%d %H:%M:%S {tz}")
@@ -139,7 +159,7 @@ def createMarkdown(outputPath, title, htmlbodyString, publishDate, slug):
     # ---
     f.write("---\n")
     f.write("layout: post\n")
-    f.write(f'title: "{title}"\n')
+    f.write(f'title: "{processTitle(title)}"\n')
     f.write(f'date: "{blogDate}"\n')
     if (isJekyll()):
       f.write(f'categories: blog\n')
